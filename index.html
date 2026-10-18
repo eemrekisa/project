@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#171329">
+    <meta name="description" content="Emre ve Dilara için özel anılar dünyası.">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="img/app-icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="img/app-icon.svg">
+    <title>Emre & Dilara Anı Dünyası</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Sacramento&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        body { font-family: 'Poppins', sans-serif; user-select: none; }
+        .romantic-font { font-family: 'Sacramento', cursive; }
+        .glass { background: rgba(15, 15, 25, 0.95); backdrop-filter: blur(18px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .cell { transition: all 0.2s ease; }
+        @keyframes bigDiceRoll {
+            0% { transform: scale(0.5) rotate(0deg); opacity: 0; }
+            50% { transform: scale(1.2) rotate(180deg); opacity: 1; }
+            100% { transform: scale(1) rotate(360deg); opacity: 1; }
+        }
+        .big-rolling { animation: bigDiceRoll 0.6s ease-in-out; }
+        @keyframes hop {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-10px) scale(1.15); }
+        }
+        .hopping { animation: hop 0.3s ease-in-out; }
+        .tab-content { display: none; }
+        .tab-content.active { display: flex; flex-direction: column; }
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; scroll-behavior: smooth; }
+        button, input, textarea { -webkit-tap-highlight-color: transparent; }
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+
+
+
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-950 via-rose-950 to-indigo-950 min-h-screen text-gray-100 flex flex-col justify-between overflow-x-hidden">
+
+    <!-- ARKA PLAN MÜZİK -->
+    <audio id="bgMusic" loop>
+        <source src="audio/romantik.mp3" type="audio/mp3">
+    </audio>
+
+    <!-- KİLİT EKRANI -->
+    <div id="lockScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-2xl p-4">
+        <div class="glass p-8 rounded-3xl shadow-2xl max-w-md w-full text-center border border-rose-500/30">
+            <div class="w-20 h-20 bg-rose-500/20 rounded-full flex items-center justify-center mx-auto mb-6 text-rose-400 text-3xl shadow-inner">
+                <i class="fa-solid fa-heart-pulse animate-pulse"></i>
+            </div>
+            <h2 class="text-3xl font-bold mb-2 text-rose-300">Emre & Dilara Dünyası</h2>
+            <p class="text-gray-400 text-sm mb-6">Kapıyı açmak için şifreyi gir</p>
+            <input type="password" id="passcode" placeholder="Şifre..." class="w-full px-4 py-3 bg-gray-900 border border-rose-500/30 rounded-xl text-center text-xl tracking-widest text-rose-200 focus:outline-none focus:border-rose-500 mb-4">
+            <button onclick="checkPass()" class="w-full py-3 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-semibold rounded-xl shadow-lg shadow-rose-600/35 transition active:scale-95">
+                İçeri Gir <i class="fa-solid fa-heart ml-2"></i>
+            </button>
+            <p id="errorMsg" class="text-rose-400 text-xs mt-3 hidden">Şifre yanlış, tekrar dene!</p>
+        </div>
+    </div>
+
+    <!-- ANA UYGULAMA -->
+    <div id="mainContent" class="hidden flex-grow flex flex-col justify-between">
+        
+        <!-- ÜST MENÜ (NAVBAR) -->
+        <header class="glass sticky top-0 z-40 px-3 py-3 border-b border-white/10 flex flex-col gap-2">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-heart text-rose-500 text-lg animate-pulse"></i>
+                    <span class="font-bold text-xs md:text-sm tracking-wide text-rose-300">Emre & Dilara</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="toggleMusic()" id="musicBtn" class="bg-rose-500/25 border border-rose-500/30 px-3 py-1 rounded-full text-rose-300 text-[10px] font-semibold flex items-center gap-1.5 active:scale-95 transition">
+                        <i id="musicIcon" class="fa-solid fa-volume-xmark"></i> <span id="musicText">Müzik Kapalı</span>
+                    </button>
+                    <div class="text-[10px] bg-rose-500/25 border border-rose-500/30 px-2.5 py-0.5 rounded-full text-rose-300 font-semibold" id="topTimer">
+                        Birlikteyiz ❤️
+                    </div>
+                </div>
+            </div>
+            <nav class="flex gap-1 text-center text-[10px] md:text-xs font-semibold overflow-x-auto hide-scroll pb-0.5">
+                <button onclick="switchTab('notes')" id="btn-notes" class="shrink-0 px-3 py-2 rounded-xl bg-rose-600 text-white transition shadow">💌 Mektuplar</button>
+                <button onclick="switchTab('game')" id="btn-game" class="shrink-0 px-3 py-2 rounded-xl bg-gray-900 text-gray-300 border border-white/5 transition">🎲 Oyun</button>
+                <button onclick="switchTab('feed')" id="btn-feed" class="shrink-0 px-3 py-2 rounded-xl bg-gray-900 text-gray-300 border border-white/5 transition">📸 Anılar</button>
+                <button onclick="switchTab('movies')" id="btn-movies" class="shrink-0 px-3 py-2 rounded-xl bg-gray-900 text-gray-300 border border-white/5 transition">🎬 Filmler</button>
+            </nav>
+        </header>
+
+        <!-- İÇERİK ALANLARI -->
+        <main class="max-w-4xl w-full mx-auto p-3 flex-grow flex flex-col justify-center">
+            
+            <!-- 1. GELECEK MEKTUPLARI + GÜNÜN SÜRPRİZİ -->
+            <section id="tab-notes" class="tab-content active space-y-4">
+                <div class="glass p-5 rounded-3xl border border-rose-500/30 space-y-3 shadow-2xl text-center">
+                    <p class="text-xs uppercase tracking-[0.2em] text-rose-300">Emre & Dilara'ya özel</p>
+                    <h2 class="text-3xl font-bold text-rose-200 romantic-font">Günün Sürprizi 💝</h2>
+                    <p class="text-sm text-gray-300">Bugünün küçük mutluluğunu aç bakalım...</p>
+                    <div id="dailySurpriseMessage" class="hidden p-4 bg-rose-950/40 rounded-2xl border border-rose-400/30 text-rose-100 leading-relaxed"></div>
+                    <button id="dailySurpriseButton" onclick="revealDailySurprise()" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-rose-600 to-pink-600 font-bold shadow-lg active:scale-95 transition">🎁 Sürprizi Aç</button>
+                    <details class="text-left mt-2">
+                        <summary class="cursor-pointer text-xs text-rose-300">Sürpriz mesajlarını düzenle</summary>
+                        <p class="text-[11px] text-gray-400 mt-2 mb-2">Her satıra bir mesaj yaz. Değişiklikler bu cihazda saklanır.</p>
+                        <textarea id="surpriseEditor" rows="5" class="w-full p-3 rounded-xl bg-gray-950 border border-rose-500/30 text-sm text-gray-100" placeholder="Seni gülümseten mesajlar..."></textarea>
+                        <button onclick="saveSurpriseMessages()" class="mt-2 px-4 py-2 rounded-lg bg-rose-700 hover:bg-rose-600 text-xs font-bold">Mesajları Kaydet</button>
+                    </details>
+                </div>
+                <div class="glass p-5 rounded-3xl border border-pink-500/25 space-y-4">
+                    <div class="text-center">
+                        <h2 class="text-2xl font-bold text-pink-200 romantic-font">Gelecekte Açılacak Mektuplar 💌</h2>
+                        <p class="text-xs text-gray-400 mt-1">Bugünden geleceğe, doğru zamanda açılacak küçük hatıralar.</p>
+                    </div>
+                    <form id="letterForm" class="space-y-3" onsubmit="saveLetter(event)">
+                        <input id="letterTitle" maxlength="80" required class="w-full p-3 rounded-xl bg-gray-950 border border-pink-500/25 text-sm" placeholder="Mektubun başlığı (ör. Bir sonraki yıl dönümümüz)">
+                        <textarea id="letterBody" rows="4" required class="w-full p-3 rounded-xl bg-gray-950 border border-pink-500/25 text-sm" placeholder="Gelecekteki bize söylemek istediğin şey..."></textarea>
+                        <div class="flex flex-col sm:flex-row gap-2 sm:items-center">
+                            <label for="letterDate" class="text-xs text-gray-300">Açılacağı tarih</label>
+                            <input id="letterDate" type="date" required class="flex-1 p-3 rounded-xl bg-gray-950 border border-pink-500/25 text-sm">
+                            <button type="submit" class="px-5 py-3 rounded-xl bg-pink-700 hover:bg-pink-600 font-bold text-sm">💌 Mektubu Sakla</button>
+                        </div>
+                    </form>
+                    <div id="lettersList" class="space-y-3"></div>
+                    <p class="text-[10px] text-gray-500">Not: Mektuplar bu cihazda saklanır. Tarih kontrolü cihaz saatine bağlıdır.</p>
+                </div>
+            </section>
+
+            <!-- 2. OYUN -->
+            <section id="tab-game" class="tab-content space-y-2">
+                <div class="grid grid-cols-2 gap-2 text-center text-xs mb-1">
+                    <div class="bg-blue-950/60 border border-blue-500/30 rounded-xl p-1 flex justify-around items-center">
+                        <span class="font-bold text-blue-300 text-[11px]">Emre 👨🏻</span>
+                        <span id="p1Money" class="font-mono text-emerald-400 font-bold text-xs">2000 ₺</span>
+                    </div>
+                    <div class="bg-pink-950/60 border border-pink-500/30 rounded-xl p-1 flex justify-around items-center">
+                        <span class="font-bold text-pink-300 text-[11px]">Dilara 👩🏻</span>
+                        <span id="p2Money" class="font-mono text-emerald-400 font-bold text-xs">2000 ₺</span>
+                    </div>
+                </div>
+
+                <div class="glass p-2 rounded-2xl border border-rose-500/20 shadow-2xl overflow-x-auto">
+                    <div class="grid grid-cols-8 gap-1 text-center min-w-[600px]" id="monopolyBoard"></div>
+                </div>
+
+                <div class="glass p-3 rounded-2xl border border-rose-500/20 flex flex-col items-center justify-between gap-2 text-center">
+                    <div>
+                        <span id="turnIndicator" class="text-[11px] font-bold uppercase px-3 py-0.5 rounded-full bg-blue-600 text-white inline-block mb-0.5 shadow">Emre'nin Sırası 👨🏻</span>
+                        <h3 id="statusText" class="text-xs md:text-sm font-semibold text-rose-200">Zarı at, mülkleri satın al veya kiraları topla!</h3>
+                    </div>
+                    
+                    <div id="actionButtons" class="flex gap-2 w-full max-w-xs justify-center">
+                        <button id="rollBtn" onclick="rollDice()" class="w-full py-2.5 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-bold rounded-xl shadow-lg shadow-rose-600/30 transition transform active:scale-95 flex items-center justify-center gap-2 text-xs">
+                            <i class="fa-solid fa-dice text-base" id="diceIcon"></i> Zar At
+                        </button>
+                        <button id="buyBtn" onclick="buyProperty()" class="hidden flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg transition active:scale-95 text-xs">
+                            <span id="buyText">Satın Al</span> (<span id="buyCost">100</span>₺)
+                        </button>
+                        <button id="skipBtn" onclick="skipAction()" class="hidden flex-1 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold rounded-xl shadow transition active:scale-95 text-xs">
+                            Pas Geç / Atla
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. ANILAR (ZAMAN TÜNELİ - ANU/ KLASÖRÜ) -->
+            <section id="tab-feed" class="tab-content space-y-4 max-h-[75vh] overflow-y-auto pr-1">
+                <div class="text-center">
+                    <h3 class="text-lg font-bold text-rose-300"><i class="fa-solid fa-clock-rotate-left mr-2"></i>Anı Zaman Tüneli</h3>
+                </div>
+                
+                <div id="memoryFeedContainer" class="space-y-4">
+                    <!-- 2026 Anıları -->
+                    <div class="glass p-4 rounded-3xl border border-rose-500/30 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-rose-500/20 flex items-center justify-center text-rose-300 text-xs"><i class="fa-solid fa-heart"></i></div>
+                                <span class="text-xs font-bold text-rose-200">2026 Anıları</span>
+                            </div>
+                            <span class="text-[10px] text-gray-400">2026</span>
+                        </div>
+                        <div class="relative group w-full">
+                            <button onclick="scrollFeed('feed-2026', -1)" class="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-black/70 hover:bg-rose-600 text-white rounded-full flex items-center justify-center transition opacity-0 group-hover:opacity-100 shadow-lg cursor-pointer">
+                                <i class="fa-solid fa-chevron-left text-sm"></i>
+                            </button>
+                            <div id="feed-2026" class="flex overflow-x-auto hide-scroll gap-3 py-1 snap-x snap-mandatory rounded-2xl w-full">
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2026 (1).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2026 (2).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2026 (3).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2026 (4).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2026 (5).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2026 (6).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2026 (7).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2026 (8).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2026 (9).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2026 (10).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2026.jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                            </div>
+                            <button onclick="scrollFeed('feed-2026', 1)" class="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-black/70 hover:bg-rose-600 text-white rounded-full flex items-center justify-center transition opacity-0 group-hover:opacity-100 shadow-lg cursor-pointer">
+                                <i class="fa-solid fa-chevron-right text-sm"></i>
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-300 text-center">En taze anılarımız, gülümsemelerimiz ve birlikte yazdığımız yeni sayfa... 🤍</p>
+                    </div>
+
+                    <!-- 2025 Anıları -->
+                    <div class="glass p-4 rounded-3xl border border-rose-500/30 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-rose-500/20 flex items-center justify-center text-rose-300 text-xs"><i class="fa-solid fa-heart"></i></div>
+                                <span class="text-xs font-bold text-rose-200">2025 Anıları</span>
+                            </div>
+                            <span class="text-[10px] text-gray-400">2025</span>
+                        </div>
+                        <div class="relative group w-full">
+                            <button onclick="scrollFeed('feed-2025', -1)" class="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-black/70 hover:bg-rose-600 text-white rounded-full flex items-center justify-center transition opacity-0 group-hover:opacity-100 shadow-lg cursor-pointer">
+                                <i class="fa-solid fa-chevron-left text-sm"></i>
+                            </button>
+                            <div id="feed-2025" class="flex overflow-x-auto hide-scroll gap-3 py-1 snap-x snap-mandatory rounded-2xl w-full">
+				<div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2025.jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2025 (2).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2025 (3).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2025 (4).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2025 (5).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2025 (6).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2025 (7).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2025 (8).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2025 (9).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2025 (10).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2025 (11).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>                            
+                            </div>
+                            <button onclick="scrollFeed('feed-2025', 1)" class="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-black/70 hover:bg-rose-600 text-white rounded-full flex items-center justify-center transition opacity-0 group-hover:opacity-100 shadow-lg cursor-pointer">
+                                <i class="fa-solid fa-chevron-right text-sm"></i>
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-300 text-center">Birlikte geçen harika bir yıl daha, her anı ayrı güzel. ✨</p>
+                    </div>
+
+                    <!-- 2024 Anıları -->
+                    <div class="glass p-4 rounded-3xl border border-rose-500/30 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-rose-500/20 flex items-center justify-center text-rose-300 text-xs"><i class="fa-solid fa-heart"></i></div>
+                                <span class="text-xs font-bold text-rose-200">2024 Anıları</span>
+                            </div>
+                            <span class="text-[10px] text-gray-400">2024</span>
+                        </div>
+                        <div class="relative group w-full">
+                            <button onclick="scrollFeed('feed-2024', -1)" class="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-black/70 hover:bg-rose-600 text-white rounded-full flex items-center justify-center transition opacity-0 group-hover:opacity-100 shadow-lg cursor-pointer">
+                                <i class="fa-solid fa-chevron-left text-sm"></i>
+                            </button>
+                            <div id="feed-2024" class="flex overflow-x-auto hide-scroll gap-3 py-1 snap-x snap-mandatory rounded-2xl w-full">
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2024.jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2024 (2).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2024 (3).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2024 (4).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2024 (5).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2024 (6).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2024 (7).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2024 (8).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2024 (9).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2024 (10).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2024 (11).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                            </div>
+                            <button onclick="scrollFeed('feed-2024', 1)" class="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-black/70 hover:bg-rose-600 text-white rounded-full flex items-center justify-center transition opacity-0 group-hover:opacity-100 shadow-lg cursor-pointer">
+                                <i class="fa-solid fa-chevron-right text-sm"></i>
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-300 text-center">Anılarımızın taçlandığı, kahkahaların eksik olmadığı o güzel günler. 📸</p>
+                    </div>
+
+                    <!-- 2023 Anıları -->
+                    <div class="glass p-4 rounded-3xl border border-rose-500/30 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-rose-500/20 flex items-center justify-center text-rose-300 text-xs"><i class="fa-solid fa-heart"></i></div>
+                                <span class="text-xs font-bold text-rose-200">2023 Anıları</span>
+                            </div>
+                            <span class="text-[10px] text-gray-400">2023</span>
+                        </div>
+                        <div class="relative group w-full">
+                            <button onclick="scrollFeed('feed-2023', -1)" class="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-black/70 hover:bg-rose-600 text-white rounded-full flex items-center justify-center transition opacity-0 group-hover:opacity-100 shadow-lg cursor-pointer">
+                                <i class="fa-solid fa-chevron-left text-sm"></i>
+                            </button>
+                            <div id="feed-2023" class="flex overflow-x-auto hide-scroll gap-3 py-1 snap-x snap-mandatory rounded-2xl w-full">
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2023 (2).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2023 (3).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2023 (4).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2023 (5).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2023 (6).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2023 (7).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2023 (8).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2023 (9).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2023 (10).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2023 (11).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2023 (12).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2023.jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                            </div>
+                            <button onclick="scrollFeed('feed-2023', 1)" class="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-black/70 hover:bg-rose-600 text-white rounded-full flex items-center justify-center transition opacity-0 group-hover:opacity-100 shadow-lg cursor-pointer">
+                                <i class="fa-solid fa-chevron-right text-sm"></i>
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-300 text-center">Zaman akıp giderken yan yana olmanın huzuru. 🕰️❤️</p>
+                    </div>
+
+                    <!-- 2022 Anıları -->
+                    <div class="glass p-4 rounded-3xl border border-rose-500/30 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-rose-500/20 flex items-center justify-center text-rose-300 text-xs"><i class="fa-solid fa-heart"></i></div>
+                                <span class="text-xs font-bold text-rose-200">2022 Anıları</span>
+                            </div>
+                            <span class="text-[10px] text-gray-400">2022</span>
+                        </div>
+                        <div class="relative group w-full">
+                            <button onclick="scrollFeed('feed-2022', -1)" class="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-black/70 hover:bg-rose-600 text-white rounded-full flex items-center justify-center transition opacity-0 group-hover:opacity-100 shadow-lg cursor-pointer">
+                                <i class="fa-solid fa-chevron-left text-sm"></i>
+                            </button>
+                            <div id="feed-2022" class="flex overflow-x-auto hide-scroll gap-3 py-1 snap-x snap-mandatory rounded-2xl w-full">
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2022 (2).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2022 (3).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2022 (4).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2022 (5).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2022.jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                            </div>
+                            <button onclick="scrollFeed('feed-2022', 1)" class="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-black/70 hover:bg-rose-600 text-white rounded-full flex items-center justify-center transition opacity-0 group-hover:opacity-100 shadow-lg cursor-pointer">
+                                <i class="fa-solid fa-chevron-right text-sm"></i>
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-300 text-center">En tatlı anlar ve paylaşılan güzel zamanlar. 🌟</p>
+                    </div>
+
+                    <!-- 2021 Anıları -->
+                    <div class="glass p-4 rounded-3xl border border-rose-500/30 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-rose-500/20 flex items-center justify-center text-rose-300 text-xs"><i class="fa-solid fa-heart"></i></div>
+                                <span class="text-xs font-bold text-rose-200">2021 Anıları</span>
+                            </div>
+                            <span class="text-[10px] text-gray-400">2021</span>
+                        </div>
+                        <div class="relative group w-full">
+                            <button onclick="scrollFeed('feed-2021', -1)" class="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-black/70 hover:bg-rose-600 text-white rounded-full flex items-center justify-center transition opacity-0 group-hover:opacity-100 shadow-lg cursor-pointer">
+                                <i class="fa-solid fa-chevron-left text-sm"></i>
+                            </button>
+                            <div id="feed-2021" class="flex overflow-x-auto hide-scroll gap-3 py-1 snap-x snap-mandatory rounded-2xl w-full">
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2021 (2).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2021 (3).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2021 (4).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2021 (5).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2021 (6).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2021 (7).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2021 (8).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2021 (9).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2021 (10).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2021 (11).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2021.jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                            </div>
+                            <button onclick="scrollFeed('feed-2021', 1)" class="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-black/70 hover:bg-rose-600 text-white rounded-full flex items-center justify-center transition opacity-0 group-hover:opacity-100 shadow-lg cursor-pointer">
+                                <i class="fa-solid fa-chevron-right text-sm"></i>
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-300 text-center">O güzel günlerden geriye kalan en güzel gülümsemeler. 🤍</p>
+                    </div>
+
+                    <!-- 2020 Anıları -->
+                    <div class="glass p-4 rounded-3xl border border-rose-500/30 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-rose-500/20 flex items-center justify-center text-rose-300 text-xs"><i class="fa-solid fa-heart"></i></div>
+                                <span class="text-xs font-bold text-rose-200">2020 Anıları</span>
+                            </div>
+                            <span class="text-[10px] text-gray-400">2020</span>
+                        </div>
+                        <div class="relative group w-full">
+                            <button onclick="scrollFeed('feed-2020', -1)" class="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-black/70 hover:bg-rose-600 text-white rounded-full flex items-center justify-center transition opacity-0 group-hover:opacity-100 shadow-lg cursor-pointer">
+                                <i class="fa-solid fa-chevron-left text-sm"></i>
+                            </button>
+                            <div id="feed-2020" class="flex overflow-x-auto hide-scroll gap-3 py-1 snap-x snap-mandatory rounded-2xl w-full">
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2020 (2).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2020 (3).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2020 (4).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2020.jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                            </div>
+                            <button onclick="scrollFeed('feed-2020', 1)" class="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-black/70 hover:bg-rose-600 text-white rounded-full flex items-center justify-center transition opacity-0 group-hover:opacity-100 shadow-lg cursor-pointer">
+                                <i class="fa-solid fa-chevron-right text-sm"></i>
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-300 text-center">Birlikte atlattığımız ve güzel hatıralar biriktirdiğimiz o özel yıl. 🌻</p>
+                    </div>
+
+                    <!-- 2019 Anıları -->
+                    <div class="glass p-4 rounded-3xl border border-rose-500/30 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-rose-500/20 flex items-center justify-center text-rose-300 text-xs"><i class="fa-solid fa-heart"></i></div>
+                                <span class="text-xs font-bold text-rose-200">2019 Anıları</span>
+                            </div>
+                            <span class="text-[10px] text-gray-400">2019</span>
+                        </div>
+                        <div class="relative group w-full">
+                            <button onclick="scrollFeed('feed-2019', -1)" class="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-black/70 hover:bg-rose-600 text-white rounded-full flex items-center justify-center transition opacity-0 group-hover:opacity-100 shadow-lg cursor-pointer">
+                                <i class="fa-solid fa-chevron-left text-sm"></i>
+                            </button>
+                            <div id="feed-2019" class="flex overflow-x-auto hide-scroll gap-3 py-1 snap-x snap-mandatory rounded-2xl w-full">
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2019 (2).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2019 (3).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2019.jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                            </div>
+                            <button onclick="scrollFeed('feed-2019', 1)" class="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-black/70 hover:bg-rose-600 text-white rounded-full flex items-center justify-center transition opacity-0 group-hover:opacity-100 shadow-lg cursor-pointer">
+                                <i class="fa-solid fa-chevron-right text-sm"></i>
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-300 text-center">Yolun başları, en tatlı heyecanlar ve ilk büyük adımlar. 💫</p>
+                    </div>
+
+                    <!-- 2018 Anıları -->
+                    <div class="glass p-4 rounded-3xl border border-rose-500/30 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-rose-500/20 flex items-center justify-center text-rose-300 text-xs"><i class="fa-solid fa-heart"></i></div>
+                                <span class="text-xs font-bold text-rose-200">2018 Anıları (Başlangıç)</span>
+                            </div>
+                            <span class="text-[10px] text-gray-400">19 Ekim 2018</span>
+                        </div>
+                        <div class="relative group w-full">
+                            <button onclick="scrollFeed('feed-2018', -1)" class="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-black/70 hover:bg-rose-600 text-white rounded-full flex items-center justify-center transition opacity-0 group-hover:opacity-100 shadow-lg cursor-pointer">
+                                <i class="fa-solid fa-chevron-left text-sm"></i>
+                            </button>
+                            <div id="feed-2018" class="flex overflow-x-auto hide-scroll gap-3 py-1 snap-x snap-mandatory rounded-2xl w-full">
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2018 (2).jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                                <div class="w-full min-w-full h-96 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center"><img src="anı/2018.jpeg" alt="Anı" class="max-w-full max-h-full object-contain"></div>
+                            </div>
+                            <button onclick="scrollFeed('feed-2018', 1)" class="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-black/70 hover:bg-rose-600 text-white rounded-full flex items-center justify-center transition opacity-0 group-hover:opacity-100 shadow-lg cursor-pointer">
+                                <i class="fa-solid fa-chevron-right text-sm"></i>
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-300 text-center">Her şeyin başladığı o ilk an, ilk kare... Hikayemizin kökleri burada. 🤍🍂</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. FİLMLER -->
+            <section id="tab-movies" class="tab-content space-y-3">
+                <div class="glass p-4 rounded-3xl border border-rose-500/30 space-y-3">
+                    <div class="text-center">
+                        <h3 class="text-lg font-bold text-rose-300"><i class="fa-solid fa-film mr-2"></i>Disney Animasyon Listesi</h3>
+                        <p class="text-xs text-gray-400">İzledikçe tik atıp üzerini çizebileceğimiz özel film listemiz!</p>
+                    </div>
+                    <div id="movieListContainer" class="space-y-2 max-h-72 overflow-y-auto p-1"></div>
+                </div>
+            </section>
+        </main>
+
+        <!-- ZAR MODALI -->
+        <div id="diceModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+            <div class="glass p-8 rounded-3xl border border-rose-500/50 text-center space-y-6 shadow-2xl max-w-xs w-full">
+                <h3 class="text-lg font-bold text-rose-300">Zarlar Atılıyor...</h3>
+                <div class="flex justify-center gap-4 text-6xl text-rose-200">
+                    <div id="modalDice1" class="w-20 h-20 bg-gray-900 border-2 border-rose-500 rounded-2xl flex items-center justify-center shadow-inner big-rolling">⚀</div>
+                    <div id="modalDice2" class="w-20 h-20 bg-gray-900 border-2 border-rose-500 rounded-2xl flex items-center justify-center shadow-inner big-rolling">⚁</div>
+                </div>
+                <p id="modalDiceResult" class="text-sm font-semibold text-gray-300">Şansınız dönüyor...</p>
+            </div>
+        </div>
+
+        <!-- FESTİVAL MODALI -->
+        <div id="festivalModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+            <div class="glass max-w-md w-full p-5 rounded-3xl border border-rose-500/40 text-center space-y-3 relative">
+                <h3 class="text-xl font-bold text-rose-300"><i class="fa-solid fa-champagne-glasses mr-2"></i>Festival Zamanı!</h3>
+                <p id="festivalDescText" class="text-xs text-gray-300">Kirasını 5x katına çıkaracağın kendi mülkünü seç:</p>
+                <div id="festivalOptions" class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-1"></div>
+            </div>
+        </div>
+
+        <!-- SEYAHAT MODALI -->
+        <div id="travelModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+            <div class="glass max-w-md w-full p-5 rounded-3xl border border-rose-500/40 text-center space-y-3 relative">
+                <h3 class="text-xl font-bold text-rose-300"><i class="fa-solid fa-plane-departure mr-2"></i>Seyahat Noktası!</h3>
+                <p id="travelDescText" class="text-xs text-gray-300">1 tur bekledin! 150₺ ödeyerek boş veya kendi mülklerinden birine uçabilirsin ya da seyahati pas geçebilirsin:</p>
+                <div id="travelOptions" class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-1"></div>
+                <button onclick="skipTravel()" class="w-full py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl text-xs font-semibold mt-2">Seyahat Etme / Pas Geç</button>
+            </div>
+        </div>
+
+        <!-- PANDEMİ KISITI MODALI -->
+        <div id="jailModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+            <div class="glass max-w-sm w-full p-6 rounded-3xl border border-rose-500/50 text-center space-y-4">
+                <div class="w-14 h-14 bg-rose-500/20 rounded-full flex items-center justify-center mx-auto text-rose-400 text-2xl shadow-inner">
+                    <i class="fa-solid fa-triangle-exclamation animate-bounce"></i>
+                </div>
+                <h3 class="text-xl font-bold text-rose-300">Pandemi Kısıtı!</h3>
+                <p class="text-xs text-gray-200 leading-relaxed">Ev izni için 1 tur bekleyebilir veya 250 ₺ ödeyip hemen kurtulabilirsin!</p>
+                <div class="flex gap-2">
+                    <button onclick="payToExitJail()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition shadow">250 ₺ Öde & Kurtul</button>
+                    <button onclick="waitInJail()" class="flex-1 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold rounded-xl text-xs transition">1 Tur Bekle</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANI & MÜLK MODALI (img/ KLASÖRÜNE BAĞLI) -->
+        <div id="memoryModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+            <div class="glass max-w-md w-full p-5 rounded-3xl border border-rose-500/40 text-center space-y-3 relative max-h-[95vh] overflow-y-auto">
+                <button onclick="closeModal()" class="absolute top-3 right-3 text-gray-400 hover:text-white text-lg z-20"><i class="fa-solid fa-xmark"></i></button>
+                <span id="modalPlayer" class="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-rose-500 text-white inline-block">Özel Alan</span>
+                <h3 id="modalTitle" class="text-xl font-bold text-rose-300">Afife Kafe</h3>
+                
+                <div class="relative group w-full">
+                    <button onclick="scrollSlider(-1)" id="prevBtn" class="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-black/60 hover:bg-rose-600 text-white rounded-full flex items-center justify-center transition opacity-0 group-hover:opacity-100 shadow-lg cursor-pointer">
+                        <i class="fa-solid fa-chevron-left text-sm"></i>
+                    </button>
+
+                    <div id="modalImagesContainer" class="flex overflow-x-auto hide-scroll py-1 snap-x snap-mandatory rounded-2xl w-full"></div>
+
+                    <button onclick="scrollSlider(1)" id="nextBtn" class="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-black/60 hover:bg-rose-600 text-white rounded-full flex items-center justify-center transition opacity-0 group-hover:opacity-100 shadow-lg cursor-pointer">
+                        <i class="fa-solid fa-chevron-right text-sm"></i>
+                    </button>
+                </div>
+
+                <p id="sliderHint" class="text-[10px] text-gray-400 italic hidden">👈 Kenarlara gelince okları kullanabilir veya kaydırabilirsin 👉</p>
+
+                <p id="modalDesc" class="text-xs text-gray-300">Bu noktada harika anlar biriktirmiştik.</p>
+                <button onclick="closeModal()" class="w-full py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl transition shadow-lg text-xs">
+                    Devam Et <i class="fa-solid fa-arrow-right ml-1"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- KİRA ÖDEME BİLDİRİM MODALI -->
+        <div id="rentModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+            <div class="glass max-w-sm w-full p-6 rounded-3xl border border-amber-500/50 text-center space-y-4">
+                <div class="w-14 h-14 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto text-amber-400 text-2xl shadow-inner">
+                    <i class="fa-solid fa-coins animate-bounce"></i>
+                </div>
+                <h3 class="text-xl font-bold text-amber-300">Kira Ödedin!</h3>
+                <p id="rentDescText" class="text-xs text-gray-200 leading-relaxed">Rakibin mülküne bastın ve kira kesintisi yapıldı.</p>
+                <button onclick="closeRentModal()" class="w-full py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-lg shadow-lg transition text-xs">
+                    Tamam <i class="fa-solid fa-check ml-1"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- OYUN BİTTİ MODALI -->
+        <div id="gameOverModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl hidden flex items-center justify-center p-4">
+            <div class="glass max-w-md w-full p-6 rounded-3xl border border-rose-500 text-center space-y-4">
+                <div class="w-16 h-16 bg-rose-500/20 rounded-full flex items-center justify-center mx-auto text-rose-400 text-3xl">
+                    <i class="fa-solid fa-crown"></i>
+                </div>
+                <h2 id="winnerTitle" class="text-2xl font-bold text-rose-300">Turun Kazananı!</h2>
+                <p id="winnerDesc" class="text-xs text-gray-300">Mutlak hakim ilan edildiniz!</p>
+                <button onclick="location.reload()" class="w-full py-3 bg-gradient-to-r from-rose-600 to-pink-600 text-white font-bold rounded-xl shadow-lg">
+                    Yeniden Başla <i class="fa-solid fa-rotate-right ml-1"></i>
+                </button>
+            </div>
+        </div>
+
+        <footer class="text-center py-2 text-[10px] text-gray-400 glass border-t border-white/5">
+            <p>Emre & Dilara Anı Dünyası 🤍 19 Ekim</p>
+        </footer>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script>
+        let isMusicPlaying = false;
+        function toggleMusic() {
+            const music = document.getElementById('bgMusic');
+            const btn = document.getElementById('musicBtn');
+
+            if (isMusicPlaying) {
+                music.pause();
+                isMusicPlaying = false;
+                btn.innerHTML = `<i class="fa-solid fa-volume-xmark"></i> <span>Müzik Kapalı</span>`;
+            } else {
+                music.play().then(() => {
+                    isMusicPlaying = true;
+                    btn.innerHTML = `<i class="fa-solid fa-volume-high"></i> <span>Müzik Çalıyor</span>`;
+                }).catch(e => {
+                    console.log("Tarayıcı otomatik oynatmayı engelledi:", e);
+                });
+            }
+        }
+
+        function checkPass() {
+            const pass = document.getElementById('passcode').value;
+            if (pass === '1910' || pass === '1918' || pass === '19102018') {
+                document.getElementById('lockScreen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('lockScreen').style.display = 'none';
+                    document.getElementById('mainContent').classList.remove('hidden');
+                }, 400);
+            } else {
+                const err = document.getElementById('errorMsg');
+                err.classList.remove('hidden');
+                setTimeout(() => err.classList.add('hidden'), 2500);
+            }
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('header nav button').forEach(btn => {
+                btn.className = "shrink-0 px-3 py-2 rounded-xl bg-gray-900 text-gray-300 border border-white/5 transition";
+            });
+            const panel = document.getElementById('tab-' + tabName);
+            const activeBtn = document.getElementById('btn-' + tabName);
+            if (!panel || !activeBtn) return;
+            panel.classList.add('active');
+            activeBtn.className = "shrink-0 px-3 py-2 rounded-xl bg-rose-600 text-white transition shadow";
+            if(tabName === 'game') renderBoard();
+        }
+
+        const startDate = new Date('2018-10-19T00:00:00');
+        function updateTimer() {
+            const diff = new Date() - startDate;
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            document.getElementById('topTimer').innerText = `Birlikte: ${days} Gün ❤`;
+        }
+        setInterval(updateTimer, 1000);
+        updateTimer();
+
+        // Film Listesi
+        const baseMovies = [
+            { id: 1, title: "1. Oyuncak Hikayesi (Toy Story) — 1995", watched: false },
+            { id: 2, title: "2. Bir Böceğin Yaşamı (A Bug's Life) — 1998", watched: false },
+            { id: 3, title: "3. Oyuncak Hikayesi 2 — 1999", watched: false },
+            { id: 4, title: "4. Sevimli Canavarlar (Monsters, Inc.) — 2001", watched: false },
+            { id: 5, title: "5. Kayıp Balık Nemo (Finding Nemo) — 2003", watched: false },
+            { id: 6, title: "6. İnanılmaz Aile (The Incredibles) — 2004", watched: false },
+            { id: 7, title: "7. Arabalar (Cars) — 2006", watched: false },
+            { id: 8, title: "8. Ratatuy (Ratatouille) — 2007", watched: false },
+            { id: 9, title: "9. VOL-İ (WALL-E) — 2008", watched: false },
+            { id: 10, title: "10. Yukarı Bak (Up) — 2009", watched: false },
+            { id: 11, title: "11. Oyuncak Hikayesi 3 — 2010", watched: false },
+            { id: 12, title: "12. Arabalar 2 — 2011", watched: false },
+            { id: 13, title: "13. Cesur (Brave) — 2012", watched: false },
+            { id: 14, title: "14. Sevimli Üniversite (Monsters University) — 2013", watched: false },
+            { id: 15, title: "15. Ters Yüz (Inside Out) — 2015", watched: false },
+            { id: 16, title: "16. İyi Dinozor (The Good Dinosaur) — 2015", watched: false },
+            { id: 17, title: "17. Kayıp Dori (Finding Dory) — 2016", watched: false },
+            { id: 18, title: "18. Arabalar 3 — 2017", watched: false },
+            { id: 19, title: "19. Coco — 2017", watched: false },
+            { id: 20, title: "20. İnanılmaz Aile 2 — 2018", watched: false },
+            { id: 21, title: "21. Oyuncak Hikayesi 4 — 2019", watched: false },
+            { id: 22, title: "22. İleri (Onward) — 2020", watched: false },
+            { id: 23, title: "23. Ruhların Müziği (Soul) — 2020", watched: false },
+            { id: 24, title: "24. Luca — 2021", watched: false },
+            { id: 25, title: "25. Kırmızı (Turning Red) — 2022", watched: false },
+            { id: 26, title: "26. Işıkyılı (Lightyear) — 2022", watched: false },
+            { id: 27, title: "27. Şanslı Krallık (Elemental) — 2023", watched: false },
+            { id: 28, title: "28. Ters Yüz 2 (Inside Out 2) — 2024", watched: false },
+            { id: 29, title: "29. Elio — 2025", watched: false },
+            { id: 30, title: "30. Oyuncak Hikayesi 5 (Toy Story 5) — 2026", watched: false }
+        ];
+
+        let movieList = (() => {
+            let saved = localStorage.getItem('emreDilaraMovies_v3');
+            if (saved) {
+                try {
+                    let parsed = JSON.parse(saved);
+                    return baseMovies.map(m => {
+                        let found = parsed.find(p => p.id === m.id);
+                        return found ? { ...m, watched: found.watched } : m;
+                    });
+                } catch(e) { return baseMovies; }
+            }
+            return baseMovies;
+        })();
+
+        function renderMovies() {
+            const container = document.getElementById('movieListContainer');
+            container.innerHTML = '';
+            movieList.forEach(movie => {
+                container.innerHTML += `
+                    <div onclick="toggleMovie(${movie.id})" class="p-2.5 bg-gray-900/80 border ${movie.watched ? 'border-emerald-500/50 bg-emerald-950/20' : 'border-rose-500/20'} rounded-xl flex items-center justify-between cursor-pointer transition">
+                        <span class="text-xs ${movie.watched ? 'line-through text-gray-400' : 'text-rose-200'}">${movie.title}</span>
+                        <span class="text-xs px-2 py-1 rounded-lg ${movie.watched ? 'bg-emerald-600 text-white' : 'bg-gray-800 text-gray-400'}">
+                            ${movie.watched ? 'İzlendi ✔' : 'İzlenecek'}
+                        </span>
+                    </div>
+                `;
+            });
+        }
+
+        function toggleMovie(id) {
+            let m = movieList.find(x => x.id === id);
+            if(m) {
+                m.watched = !m.watched;
+                localStorage.setItem('emreDilaraMovies_v3', JSON.stringify(movieList));
+                renderMovies();
+            }
+        }
+        renderMovies();
+
+        // OYUN MÜLKLERİ (img/ KLASÖRÜNDEN DOĞRU DOSYA YOLLARI)
+        const board = [
+            { id: 0, name: "Başlangıç", type: "start", price: 0, baseRent: 0, rent: 0, owner: null, desc: "Her başlangıç ve geçişte +200₺ maaş alırsın!" },
+            { id: 1, name: "Anadolu Lisesi", type: "property", price: 100, baseRent: 50, rent: 50, owner: null, desc: "Tanıştığımız o efsane lise dönemi.", images: ["img/lise.jpeg", "img/lise3.jpeg"] },
+            { id: 2, name: "İlk Buluşma Parkı", type: "property", price: 125, baseRent: 50, rent: 50, owner: null, desc: "İlk bank anısı.", images: ["img/park.jpeg"] },
+            { id: 3, name: "Limon Parkı", type: "property", price: 150, baseRent: 75, rent: 75, owner: null, desc: "Yeşillikler içinde huzur parkı.", images: ["img/limon parkı.jpeg"] },
+            { id: 4, name: "Sürpriz Kutu", type: "chance", price: 0, baseRent: 0, rent: 0, owner: null, desc: "Sürpriz şans veya masraf kartı!" },
+            { id: 5, name: "Afife Kafe", type: "property", price: 300, baseRent: 150, rent: 150, owner: null, desc: "En koyu sohbetlerin ve kahkahaların döndüğü mekanımız!", images: ["img/afife.jpeg", "img/afife2.jpeg", "img/afife3.jpeg", "img/afife4.jpeg"] },
+            { id: 6, name: "BANÜ", type: "property", price: 250, baseRent: 125, rent: 125, owner: null, desc: "Bandırma Onyedi Eylül Üniversitesi.", images: ["img/banü mezun.jpeg"] },    
+            { id: 7, name: "Pandemi Kısıtı", type: "jail", price: 0, baseRent: 0, rent: 0, owner: null, desc: "Aranızdaki tatlı kısıt! 1 tur bekle ya da 250₺ öde çık." },
+            { id: 8, name: "The Light Lounge", type: "property", price: 275, baseRent: 125, rent: 125, owner: null, desc: "Kahve ve ortam durağı.", images: ["img/light.jpeg"] },       
+            { id: 9, name: "Mr. Sweet", type: "property", price: 225, baseRent: 100, rent: 100, owner: null, desc: "Bilecik'in tatlı buluşma durağı.", images: ["img/sweet.jpeg", "img/sweet2.jpeg"] },
+            { id: 10, name: "Pelitözü Göleti", type: "property", price: 275, baseRent: 125, rent: 125, owner: null, desc: "Gölet kenarı huzurlu piknikler.", images: ["img/golet.jpeg", "img/golet2.jpeg", "img/golet3.jpeg", "img/golet4.jpeg", "img/golet5.jpeg", "img/golet manzara.jpg"] },
+            { id: 11, name: "Bandırma Sahil", type: "property", price: 125, baseRent: 50, rent: 50, owner: null, desc: "Dalga sesleri eşliğinde uzun sahil yürüyüşleri.", images: ["img/bandırma sahil.jpeg", "img/bandırma sahil2.jpeg", "img/bandırma sahil3.jpeg"] },
+            { id: 12, name: "FaceTime Geceleri", type: "property", price: 150, baseRent: 75, rent: 75, owner: null, desc: "Uzun mesafeli görüntülü aramalar.", images: ["img/facetime.jpeg"] },
+            { id: 13, name: "Burger King", type: "property", price: 300, baseRent: 150, rent: 150, owner: null, desc: "Favori fast-food durağımız!", images: ["img/burger.jpeg", "img/burger2.jpeg"] },
+            { id: 14, name: "Bilecik Sokakları", type: "property", price: 175, baseRent: 75, rent: 75, owner: null, desc: "Bilecik'in sokaklarında yürüyüşler.", images: ["img/sokak1.jpeg", "img/sokak2.jpeg"] },
+            { id: 15, name: "Bandırma Tren Garı", type: "property", price: 175, baseRent: 75, rent: 75, owner: null, desc: "Nostaljik tren garı anısı.", images: ["img/tren garı.jpeg"] },
+            { id: 16, name: "Diyetisyen Staj Ziyareti", type: "property", price: 325, baseRent: 175, rent: 175, owner: null, desc: "Biricik diyetisyenimizi staj yerinde ziyaret ettiğimiz an!", images: ["img/dyt.jpeg"] },
+            { id: 17, name: "Ortak Şarkı Noktası", type: "property", price: 175, baseRent: 75, rent: 75, owner: null, desc: "Arabada hep son ses dinlenen şarkı.", images: ["img/araba1.jpg"] },
+            { id: 18, name: "Sürpriz Kutu", type: "chance", price: 0, baseRent: 0, rent: 0, owner: null, desc: "Sürpriz şans veya masraf kartı!" },
+            { id: 19, name: "Bandırma Merkez", type: "property", price: 200, baseRent: 100, rent: 100, owner: null, desc: "Bandırma sokaklarında gezmeler.", images: ["img/bandırma.jpeg"] },
+            { id: 20, name: "Seyahat Noktası", type: "travel", price: 0, baseRent: 0, rent: 0, owner: null, desc: "1 tur bekleyip 150₺ ödeyerek boş ya da kendi mülküne uçabilirsin!" },
+            { id: 21, name: "Evin Önü 5 Dk Kaçamağı", type: "property", price: 150, baseRent: 75, rent: 75, owner: null, desc: "Ayrılmadan önce evin önünde yapılan o tatlı kısa kaçamak!", images: ["img/ev önü.jpeg"] },
+            { id: 22, name: "İKÇÜ", type: "property", price: 325, baseRent: 175, rent: 175, owner: null, desc: "İzmir Katip Çelebi Üniversitesi yılları.", images: ["img/ikçü mezun.jpeg"] },
+            { id: 23, name: "Festival Durağı", type: "festival", price: 0, baseRent: 0, rent: 0, owner: null, desc: "Festival Var! Seçtiğin mülkün kirasını katla!" },
+            { id: 24, name: "İlk Tatil", type: "property", price: 350, baseRent: 200, rent: 200, owner: null, desc: "Şehir dışı kaçamağımız.", images: ["img/tatil.jpeg"] },
+            { id: 25, name: "Araba & Kahve Keyfi", type: "property", price: 200, baseRent: 100, rent: 100, owner: null, desc: "Kahveleri alıp arabada müzik dinleyerek takıldığımız anlar.", images: ["img/araba2.jpg", "img/araba3.jpeg"] }
+        ];
+
+        const chanceCards = [
+            { title: "Bursa Otogarı Valiz Bonusu", desc: "Yabancı biri 5 dakikalığına valizini bıraktı, sevap kazandın!", money: 250 },
+            { title: "Burger King", desc: "Sürekli gidip Chicken Royale gömdünüz, hesap size kaldı!", money: -150 },
+            { title: "Tribün Lideri", desc: "Emre'nin maçını izlemeye geldin, yol masrafı çıktı!", money: -150 },
+            { title: "Çeyiz Alışverişi", desc: "Çeyiz malzemesi eklendi, bütçe biraz sarsıldı kiral!", money: -250 },
+            { title: "Sokak Kedilerine Mama", desc: "Sokaktaki kedilere mama aldın, cüzdan hafifledi ama sevap büyük!", money: -100 },
+            { title: "KPSS / ALES Başvurusu", desc: "Yine sınav dönemi! ÖSYM'ye başvuru ücreti kaptırdın.", money: -200 },
+            { title: "TÜİK Enflasyon Düzeltmesi", desc: "Maliye ve enflasyon vergisi kapıyı çaldı!", money: -200 },
+            { title: "Şanslı Gün", desc: "Yolda yürüyüş yaparken yerde para buldun!", money: 200 }
+        ];
+
+        let player1 = { name: "Emre 👨🏻", pos: 0, money: 2000, jailTurns: 0, travelTurns: 0, consecutiveDoubles: 0 };
+        let player2 = { name: "Dilara 👩🏻", pos: 0, money: 2000, jailTurns: 0, travelTurns: 0, consecutiveDoubles: 0 };
+        let turn = 1;
+        let pendingProperty = null;
+        let activeFestivalPropId = null;
+        let isAnimating = false;
+
+        function renderBoard() {
+            const grid = document.getElementById('monopolyBoard');
+            grid.innerHTML = '';
+            
+            const cols = 8;
+            const rows = 7;
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    let cellIndex = null;
+                    if (r === 0) cellIndex = c;
+                    else if (c === cols - 1 && r > 0) cellIndex = (cols - 1) + r;
+                    else if (r === rows - 1 && c < cols - 1) cellIndex = (cols - 1) + (rows - 1) + (cols - 1 - c);
+                    else if (c === 0 && r > 0 && r < rows - 1) cellIndex = board.length - r;
+
+                    if (cellIndex !== null && cellIndex < board.length) {
+                        const cell = board[cellIndex];
+                        const isP1 = player1.pos === cellIndex;
+                        const isP2 = player2.pos === cellIndex;
+                        
+                        let ownerBadge = '';
+                        if (cell.owner === 1) ownerBadge = '<span class="text-[6px] bg-blue-600 text-white px-0.5 rounded">Emre</span>';
+                        if (cell.owner === 2) ownerBadge = '<span class="text-[6px] bg-pink-600 text-white px-0.5 rounded">Dilara</span>';
+
+                        let festivalBadge = cell.id === activeFestivalPropId ? '<span class="text-[6px] bg-amber-500 text-black font-bold px-0.5 rounded animate-pulse">🔥</span>' : '';
+
+                        let displayPrice = cell.price;
+                        if(cell.owner !== null && cell.owner !== undefined && cell.owner !== turn) {
+                            displayPrice = cell.price * 2;
+                        }
+
+                        grid.innerHTML += `
+                            <div class="cell glass p-1 rounded-lg border ${isP1 || isP2 ? 'border-rose-500 bg-rose-500/20 shadow-md scale-105 hopping' : 'border-red-500/30'} flex flex-col justify-between h-16 text-left relative overflow-hidden">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-[6px] text-gray-400 font-bold">#${cellIndex}</span>
+                                    <div class="flex gap-1">${festivalBadge} ${ownerBadge}</div>
+                                </div>
+                                <div>
+                                    <h4 class="text-[7px] font-bold text-rose-300 leading-tight truncate">${cell.name}</h4>
+                                    <p class="text-[6px] text-emerald-400 font-mono">${cell.price ? displayPrice + '₺' : ''}</p>
+                                </div>
+                                <div class="flex gap-0.5">
+                                    ${isP1 ? '<span class="text-[6px] bg-blue-600 text-white px-1 rounded-full font-bold animate-bounce">Emre</span>' : ''}
+                                    ${isP2 ? '<span class="text-[6px] bg-pink-600 text-white px-1 rounded-full font-bold animate-bounce">Dilara</span>' : ''}
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        if (r === 2 && c === 3) {
+                            grid.innerHTML += `
+                                <div class="col-span-2 row-span-3 glass p-2 rounded-xl flex flex-col items-center justify-center border border-rose-500/30 bg-rose-950/30">
+                                    <i class="fa-solid fa-heart text-rose-500 text-2xl animate-pulse"></i>
+                                    <span class="text-[9px] text-rose-300 font-bold mt-1">Emre & Dilara</span>
+                                </div>
+                            `;
+                        } else if ((r >= 2 && r <= 4) && (c >= 3 && c <= 4)) {
+                            // Atla
+                        } else {
+                            grid.innerHTML += `<div class="glass rounded-lg border border-white/5 opacity-20 h-16"></div>`;
+                        }
+                    }
+                }
+            }
+
+            document.getElementById('p1Money').innerText = player1.money + ' ₺';
+            document.getElementById('p2Money').innerText = player2.money + ' ₺';
+            
+            if (player1.money < 0) triggerGameOver(player2, player1, "iflas etti!");
+            if (player2.money < 0) triggerGameOver(player1, player2, "iflas etti!");
+        }
+
+        function triggerGameOver(winner, looser, reason) {
+            document.getElementById('winnerTitle').innerText = `${winner.name} Kazandı!`;
+            document.getElementById('winnerDesc').innerText = `${looser.name} ${reason} 🎉 Mutlak hakim ilan edildiniz!`;
+            document.getElementById('gameOverModal').classList.remove('hidden');
+        }
+
+        function setActionButtonsState(showRoll, showBuy, showSkip) {
+            const rollBtn = document.getElementById('rollBtn');
+            const buyBtn = document.getElementById('buyBtn');
+            const skipBtn = document.getElementById('skipBtn');
+
+            rollBtn.classList.toggle('hidden', !showRoll);
+            buyBtn.classList.toggle('hidden', !showBuy);
+            skipBtn.classList.toggle('hidden', !showSkip);
+        }
+
+        function rollDice() {
+            if (isAnimating) return;
+            let p = (turn === 1 ? player1 : player2);
+            
+            if (p.jailTurns > 0) {
+                document.getElementById('jailModal').classList.remove('hidden');
+                return;
+            }
+
+            if (p.travelTurns > 0) {
+                p.travelTurns = 0;
+                openTravelModal();
+                return;
+            }
+
+            isAnimating = true;
+            setActionButtonsState(false, false, false);
+
+            const diceModal = document.getElementById('diceModal');
+            const mDice1 = document.getElementById('modalDice1');
+            const mDice2 = document.getElementById('modalDice2');
+            const mResult = document.getElementById('modalDiceResult');
+            
+            mDice1.classList.add('big-rolling');
+            mDice2.classList.add('big-rolling');
+            mResult.innerText = "Zarlar dönüyor...";
+            diceModal.classList.remove('hidden');
+
+            setTimeout(() => {
+                mDice1.classList.remove('big-rolling');
+                mDice2.classList.remove('big-rolling');
+
+                const dice1 = Math.floor(Math.random() * 6) + 1;
+                const dice2 = Math.floor(Math.random() * 6) + 1;
+                const totalRoll = dice1 + dice2;
+                const isDouble = (dice1 === dice2);
+
+                const diceSymbols = ['', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+                mDice1.innerText = diceSymbols[dice1];
+                mDice2.innerText = diceSymbols[dice2];
+                mResult.innerText = `Toplam: ${totalRoll} ${isDouble ? ' - ÇİFT ZAR!' : ''}`;
+
+                setTimeout(() => {
+                    diceModal.classList.add('hidden');
+
+                    if (isDouble) {
+                        p.consecutiveDoubles++;
+                        if (p.consecutiveDoubles >= 3) {
+                            p.consecutiveDoubles = 0;
+                            p.pos = 7;
+                            p.jailTurns = 1;
+                            document.getElementById('statusText').innerText = `3 kez çift attın! Pandemi kısıtına gönderildin!`;
+                            isAnimating = false;
+                            switchTurn();
+                            renderBoard();
+                            return;
+                        }
+                    } else {
+                        p.consecutiveDoubles = 0;
+                    }
+
+                    movePlayerSteps(p, totalRoll, isDouble);
+
+                }, 900);
+            }, 600);
+        }
+
+        function movePlayerSteps(p, totalRoll, isDouble) {
+            let stepsLeft = totalRoll;
+            let hopInterval = setInterval(() => {
+                let oldPos = p.pos;
+                p.pos = (p.pos + 1) % board.length;
+                
+                if (p.pos < oldPos || p.pos === 0) {
+                    p.money += 200;
+                }
+
+                renderBoard();
+                stepsLeft--;
+
+                if (stepsLeft <= 0) {
+                    clearInterval(hopInterval);
+                    isAnimating = false;
+
+                    const cell = board[p.pos];
+                    document.getElementById('statusText').innerText = `${p.name} -> "${cell.name}" karesine geldi!`;
+                    handleCellAction(p, cell, isDouble);
+                }
+            }, 250);
+        }
+
+        function payToExitJail() {
+            let p = (turn === 1 ? player1 : player2);
+            if (p.money >= 250) {
+                p.money -= 250;
+                p.jailTurns = 0;
+                document.getElementById('jailModal').classList.add('hidden');
+                renderBoard();
+                rollDice();
+            } else {
+                alert("Bakiyeniz 250₺ ceza ödemek için yetersiz! Tur beklemek zorundasınız.");
+            }
+        }
+
+        function waitInJail() {
+            let p = (turn === 1 ? player1 : player2);
+            p.jailTurns = 0;
+            document.getElementById('jailModal').classList.add('hidden');
+            document.getElementById('statusText').innerText = `${p.name} pandemi kısıtında turunu geçirdi.`;
+            switchTurn();
+            renderBoard();
+        }
+
+        let currentIsDouble = false;
+
+        function handleCellAction(p, cell, isDouble) {
+            pendingProperty = null;
+            currentIsDouble = isDouble;
+            setActionButtonsState(false, false, false);
+
+            if (cell.type === "property") {
+                if (cell.owner === null || cell.owner === undefined) {
+                    if (p.money >= cell.price) {
+                        pendingProperty = { cell: cell, cost: cell.price, player: p };
+                        document.getElementById('buyText').innerText = "Satın Al";
+                        document.getElementById('buyCost').innerText = cell.price;
+                        setActionButtonsState(false, true, true);
+                    } else {
+                        setActionButtonsState(false, false, true);
+                    }
+                } else if (cell.owner !== turn) {
+                    let ownerObj = cell.owner === 1 ? player1 : player2;
+                    let paidRent = cell.rent;
+                    p.money -= paidRent;
+                    ownerObj.money += paidRent;
+
+                    document.getElementById('rentDescText').innerText = `${p.name}, ${ownerObj.name} kişisine ait "${cell.name}" mülküne bastı ve ${paidRent} ₺ kira ödedi!`;
+                    document.getElementById('rentModal').classList.remove('hidden');
+
+                    let stealCost = cell.price * 2;
+                    if (p.money >= stealCost) {
+                        pendingProperty = { cell: cell, cost: stealCost, player: p, isSteal: true, previousOwner: ownerObj };
+                        document.getElementById('buyText').innerText = "Çal";
+                        document.getElementById('buyCost').innerText = stealCost;
+                        setActionButtonsState(false, true, true);
+                    } else {
+                        setActionButtonsState(false, false, true);
+                    }
+                    renderBoard();
+                } else {
+                    setActionButtonsState(false, false, true);
+                }
+
+                setTimeout(() => {
+                    document.getElementById('modalPlayer').innerText = `${p.name} Konumda!`;
+                    document.getElementById('modalTitle').innerText = cell.name;
+                    document.getElementById('modalDesc').innerText = cell.desc;
+                    
+                    const imgContainer = document.getElementById('modalImagesContainer');
+                    const hintTag = document.getElementById('sliderHint');
+                    const prevBtn = document.getElementById('prevBtn');
+                    const nextBtn = document.getElementById('nextBtn');
+                    imgContainer.innerHTML = '';
+
+                    if(cell.images && cell.images.length > 0) {
+                        if(cell.images.length === 1) {
+                            hintTag.classList.add('hidden');
+                            prevBtn.classList.add('hidden');
+                            nextBtn.classList.add('hidden');
+                            imgContainer.innerHTML = `
+                                <div class="w-full h-80 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 flex items-center justify-center">
+                                    <img src="${cell.images[0]}" alt="Anı Fotoğrafı" class="max-w-full max-h-full object-contain">
+                                </div>
+                            `;
+                        } else {
+                            hintTag.classList.remove('hidden');
+                            prevBtn.classList.remove('hidden');
+                            nextBtn.classList.remove('hidden');
+                            cell.images.forEach(imgPath => {
+                                imgContainer.innerHTML += `
+                                    <div class="w-full h-80 bg-black/40 rounded-2xl border border-rose-500/30 overflow-hidden relative shadow-inner flex-shrink-0 snap-center flex items-center justify-center">
+                                        <img src="${imgPath}" alt="Anı Fotoğrafı" class="max-w-full max-h-full object-contain">
+                                    </div>
+                                `;
+                            });
+                        }
+                    } else {
+                        hintTag.classList.add('hidden');
+                        prevBtn.classList.add('hidden');
+                        nextBtn.classList.add('hidden');
+                        imgContainer.innerHTML = `
+                            <div class="w-full h-40 bg-black/40 rounded-2xl border border-rose-500/30 flex flex-col items-center justify-center text-rose-400 gap-1.5 flex-shrink-0">
+                                <i class="fa-solid fa-camera-retro text-2xl animate-bounce"></i>
+                                <span class="text-[10px] text-gray-400">Bu noktada çekildiğimiz anı</span>
+                            </div>
+                        `;
+                    }
+
+                    document.getElementById('memoryModal').classList.remove('hidden');
+                }, 300);
+
+            } else if (cell.type === "jail") {
+                p.jailTurns = 1;
+                endTurnLogic(isDouble);
+            } else if (cell.type === "festival") {
+                openFestivalModal();
+            } else if (cell.type === "travel") {
+                p.travelTurns = 1;
+                document.getElementById('statusText').innerText = `${p.name} seyahat noktasına geldi ve 1 tur bekleme cezası aldı!`;
+                endTurnLogic(isDouble);
+            } else if (cell.type === "chance") {
+                const card = chanceCards[Math.floor(Math.random() * chanceCards.length)];
+                p.money += card.money;
+                setTimeout(() => {
+                    document.getElementById('modalPlayer').innerText = `${p.name} Sürpriz Kutu!`;
+                    document.getElementById('modalTitle').innerText = card.title;
+                    document.getElementById('modalDesc').innerText = card.desc + ` (${card.money > 0 ? '+' + card.money : card.money}₺)`;
+                    
+                    const imgContainer = document.getElementById('modalImagesContainer');
+                    document.getElementById('sliderHint').classList.add('hidden');
+                    document.getElementById('prevBtn').classList.add('hidden');
+                    document.getElementById('nextBtn').classList.add('hidden');
+                    imgContainer.innerHTML = `
+                        <div class="w-full h-36 bg-black/40 rounded-2xl border border-rose-500/30 flex flex-col items-center justify-center text-rose-400 gap-1 flex-shrink-0">
+                            <i class="fa-solid fa-gift text-xl animate-bounce"></i>
+                            <span class="text-[10px] text-gray-400">Şans Kartı</span>
+                        </div>
+                    `;
+
+                    document.getElementById('memoryModal').classList.remove('hidden');
+                }, 300);
+                renderBoard();
+                endTurnLogic(isDouble);
+            } else {
+                endTurnLogic(isDouble);
+            }
+        }
+
+        function skipAction() {
+            endTurnLogic(currentIsDouble);
+        }
+
+        function endTurnLogic(isDouble) {
+            setActionButtonsState(false, false, false);
+            if (!isDouble) {
+                switchTurn();
+            }
+            setActionButtonsState(true, false, false);
+        }
+
+        function scrollSlider(direction) {
+            const container = document.getElementById('modalImagesContainer');
+            if(container) {
+                const scrollAmount = container.clientWidth;
+                const maxScroll = container.scrollWidth - container.clientWidth;
+                
+                if (direction === 1) {
+                    if (container.scrollLeft >= maxScroll - 5) {
+                        container.scrollTo({ left: 0, behavior: 'smooth' });
+                    } else {
+                        container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+                    }
+                } else {
+                    if (container.scrollLeft <= 5) {
+                        container.scrollTo({ left: maxScroll, behavior: 'smooth' });
+                    } else {
+                        container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+                    }
+                }
+            }
+        }
+
+        function scrollFeed(containerId, direction) {
+            const container = document.getElementById(containerId);
+            if(container) {
+                const scrollAmount = container.clientWidth;
+                const maxScroll = container.scrollWidth - container.clientWidth;
+                
+                if (direction === 1) {
+                    if (container.scrollLeft >= maxScroll - 5) {
+                        container.scrollTo({ left: 0, behavior: 'smooth' });
+                    } else {
+                        container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+                    }
+                } else {
+                    if (container.scrollLeft <= 5) {
+                        container.scrollTo({ left: maxScroll, behavior: 'smooth' });
+                    } else {
+                        container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+                    }
+                }
+            }
+        }
+
+        function openFestivalModal() {
+            const container = document.getElementById('festivalOptions');
+            const descEl = document.getElementById('festivalDescText');
+            container.innerHTML = '';
+            
+            let myProps = board.filter(b => b.type === 'property' && b.owner === turn);
+            
+            if(myProps.length === 0) {
+                descEl.innerText = "Henüz hiç mülkün olmadığı için bu durağı geçiyorsun!";
+                container.innerHTML = `<button onclick="closeFestivalModal()" class="col-span-2 p-2 bg-rose-600 text-white rounded-xl text-xs font-semibold">Devam Et</button>`;
+            } else {
+                descEl.innerText = "Kirasını 5x katına çıkaracağın kendi mülkünü seç:";
+                myProps.forEach(b => {
+                    container.innerHTML += `<button onclick="applyFestival(${b.id})" class="p-2 bg-gray-900 border border-rose-500/30 rounded-xl text-xs text-rose-200 hover:bg-rose-900/40 transition">🔥 ${b.name}</button>`;
+                });
+            }
+            document.getElementById('festivalModal').classList.remove('hidden');
+        }
+
+        function applyFestival(index) {
+            board.forEach(b => { if (b.type === 'property') b.rent = b.baseRent; });
+            let targetProp = board.find(b => b.id === index);
+            if(targetProp) {
+                targetProp.rent = targetProp.baseRent * 5;
+                activeFestivalPropId = targetProp.id;
+            }
+            document.getElementById('festivalModal').classList.add('hidden');
+            renderBoard();
+            endTurnLogic(currentIsDouble);
+        }
+
+        function closeFestivalModal() {
+            document.getElementById('festivalModal').classList.add('hidden');
+            endTurnLogic(currentIsDouble);
+        }
+
+        function openTravelModal() {
+            let p = (turn === 1 ? player1 : player2);
+            const container = document.getElementById('travelOptions');
+            container.innerHTML = '';
+            
+            let availableProps = board.filter(b => b.type === 'property' && (b.owner === null || b.owner === undefined || b.owner === turn));
+            
+            if(availableProps.length === 0) {
+                container.innerHTML = `<p class="col-span-2 text-xs text-rose-300">Uçabileceğin uygun boş veya kendi mülkün bulunmuyor!</p>`;
+            } else {
+                availableProps.forEach(b => {
+                    container.innerHTML += `<button onclick="travelTo(${b.id})" class="p-2 bg-gray-900 border border-rose-500/30 rounded-xl text-xs text-rose-200 hover:bg-rose-900/40 transition">📍 ${b.name} (${b.owner === null ? 'Boş' : 'Kendi Mülkün'})</button>`;
+                });
+            }
+            document.getElementById('travelModal').classList.remove('hidden');
+        }
+
+        function travelTo(targetIndex) {
+            let p = (turn === 1 ? player1 : player2);
+            if (p.money >= 150) {
+                p.money -= 150;
+                document.getElementById('travelModal').classList.add('hidden');
+                isAnimating = true;
+
+                let hopInterval = setInterval(() => {
+                    let oldPos = p.pos;
+                    p.pos = (p.pos + 1) % board.length;
+                    
+                    if (p.pos < oldPos || p.pos === 0) {
+                        p.money += 200;
+                    }
+
+                    renderBoard();
+
+                    if (p.pos === targetIndex) {
+                        clearInterval(hopInterval);
+                        isAnimating = false;
+
+                        const cell = board[p.pos];
+                        document.getElementById('statusText').innerText = `${p.name} seyahatle ${cell.name} mülküne ulaştı!`;
+                        handleCellAction(p, cell, false);
+                    }
+                }, 200);
+
+            } else {
+                alert("Seyahat için 150₺ bakiyeniz yetersiz!");
+            }
+        }
+
+        function skipTravel() {
+            document.getElementById('travelModal').classList.add('hidden');
+            let p = (turn === 1 ? player1 : player2);
+            document.getElementById('statusText').innerText = `${p.name} seyahati pas geçti.`;
+            renderBoard();
+            endTurnLogic(false);
+        }
+
+        function buyProperty() {
+            if (!pendingProperty) return;
+            let p = pendingProperty.player;
+            if (p.money >= pendingProperty.cost) {
+                p.money -= pendingProperty.cost;
+                
+                if (pendingProperty.isSteal && pendingProperty.previousOwner) {
+                    pendingProperty.previousOwner.money += pendingProperty.cost;
+                }
+
+                pendingProperty.cell.owner = (p === player1 ? 1 : 2);
+                renderBoard();
+                endTurnLogic(currentIsDouble);
+            }
+        }
+
+        function switchTurn() {
+            turn = turn === 1 ? 2 : 1;
+            const indicator = document.getElementById('turnIndicator');
+            if (turn === 1) {
+                indicator.innerText = "Emre'nin Sırası 👨🏻";
+                indicator.className = "text-[11px] font-bold uppercase px-3 py-0.5 rounded-full bg-blue-600 text-white inline-block mb-0.5 shadow";
+            } else {
+                indicator.innerText = "Dilara'nın Sırası 👩🏻";
+                indicator.className = "text-[11px] font-bold uppercase px-3 py-0.5 rounded-full bg-pink-600 text-white inline-block mb-0.5 shadow";
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('memoryModal').classList.add('hidden');
+        }
+
+        function closeRentModal() {
+            document.getElementById('rentModal').classList.add('hidden');
+        }
+
+        // Yeni özellikler: ayrı localStorage anahtarları mevcut film kayıtlarına dokunmaz.
+        const EXTRA_KEYS = {
+            surprises: 'emreDilaraDailySurprises_v1',
+            letters: 'emreDilaraFutureLetters_v1',
+        };
+        const defaultSurprises = [
+            'Bugün de seni seçerdim. Hem de hiç düşünmeden. ❤️',
+            'En sevdiğim yer, senin yanın.',
+            'Birlikte yaşlanacağımız günleri şimdiden merak ediyorum.',
+            'Bugün kendine iyi davranmayı unutma; benim için çok değerlisin.',
+            'Seninle sıradan bir gün bile güzel bir anıya dönüşüyor.',
+            'Sana sarılabildiğim her gün biraz daha şanslı hissediyorum.',
+            'İyi ki yollarımız kesişmiş, iyi ki varsın. 🤍'
+        ];
+        function readStored(key, fallback) {
+            try {
+                const value = localStorage.getItem(key);
+                return value === null ? fallback : JSON.parse(value);
+            } catch (e) { return fallback; }
+        }
+        function writeStored(key, value) {
+            try { localStorage.setItem(key, JSON.stringify(value)); return true; }
+            catch (e) { alert('Bu cihazda kayıt yapılamadı. Tarayıcı depolama alanını kontrol et.'); return false; }
+        }
+        function escapeHTML(value) {
+            return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+        }
+        function dateKeyLocal(date = new Date()) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+        function getSurpriseMessages() {
+            const saved = readStored(EXTRA_KEYS.surprises, null);
+            return Array.isArray(saved) && saved.length ? saved : defaultSurprises;
+        }
+        function revealDailySurprise() {
+            const messages = getSurpriseMessages();
+            const today = dateKeyLocal();
+            let hash = 0;
+            for (const ch of today) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
+            const message = messages[hash % messages.length];
+            const box = document.getElementById('dailySurpriseMessage');
+            box.textContent = message;
+            box.classList.remove('hidden');
+            document.getElementById('dailySurpriseButton').textContent = '💖 Bugünün Sürprizi';
+        }
+        function saveSurpriseMessages() {
+            const messages = document.getElementById('surpriseEditor').value.split('\n').map(x => x.trim()).filter(Boolean);
+            if (!messages.length) { alert('En az bir sürpriz mesajı yaz.'); return; }
+            if (writeStored(EXTRA_KEYS.surprises, messages)) {
+                document.getElementById('surpriseEditor').value = messages.join('\n');
+                document.getElementById('dailySurpriseMessage').classList.add('hidden');
+                document.getElementById('dailySurpriseButton').textContent = '🎁 Sürprizi Aç';
+                alert('Sürpriz mesajları kaydedildi. 💗');
+            }
+        }
+
+        function getLetters() { return readStored(EXTRA_KEYS.letters, []); }
+        function saveLetter(event) {
+            event.preventDefault();
+            const title = document.getElementById('letterTitle').value.trim();
+            const body = document.getElementById('letterBody').value.trim();
+            const date = document.getElementById('letterDate').value;
+            if (!title || !body || !date) return;
+            if (date < dateKeyLocal()) { alert('Mektup tarihi bugün veya gelecekte olmalı.'); return; }
+            const letters = getLetters();
+            letters.unshift({ id: Date.now().toString(36) + Math.random().toString(36).slice(2,7), title, body, date, createdAt: new Date().toISOString() });
+            if (writeStored(EXTRA_KEYS.letters, letters)) {
+                document.getElementById('letterForm').reset();
+                renderLetters();
+            }
+        }
+        function deleteLetter(id) {
+            if (!confirm('Bu mektubu silmek istediğine emin misin?')) return;
+            writeStored(EXTRA_KEYS.letters, getLetters().filter(letter => letter.id !== id));
+            renderLetters();
+        }
+        function renderLetters() {
+            const list = document.getElementById('lettersList');
+            if (!list) return;
+            const today = dateKeyLocal();
+            const letters = getLetters().sort((a,b) => a.date.localeCompare(b.date));
+            if (!letters.length) {
+                list.innerHTML = '<div class="text-center text-xs text-gray-500 p-4 rounded-xl bg-black/20">Henüz mektup yok. İlk mektubunuzu geleceğe bırakın. 💌</div>';
+                return;
+            }
+            list.innerHTML = letters.map(letter => {
+                const unlocked = letter.date <= today;
+                return `<article class="p-4 rounded-2xl border ${unlocked ? 'border-emerald-500/30 bg-emerald-950/20' : 'border-pink-500/20 bg-black/20'}">
+                    <div class="flex items-start justify-between gap-3"><div class="min-w-0"><h3 class="font-bold text-sm ${unlocked ? 'text-emerald-200' : 'text-pink-200'}">${unlocked ? '💌' : '🔒'} ${escapeHTML(letter.title)}</h3><p class="text-[10px] text-gray-400 mt-1">Açılma tarihi: ${escapeHTML(letter.date)}</p></div><button onclick="deleteLetter('${escapeHTML(letter.id)}')" class="text-gray-500 hover:text-rose-300 text-xs" aria-label="Mektubu sil">Sil</button></div>
+                    ${unlocked ? `<p class="text-sm leading-relaxed whitespace-pre-wrap mt-3 text-gray-200">${escapeHTML(letter.body)}</p>` : '<p class="text-xs text-gray-500 mt-3">Bu mektup zamanı gelince açılacak. İçeriği şimdilik gizli. 🤍</p>'}
+                </article>`;
+            }).join('');
+        }
+
+
+        // İlk yükleme: varsayılanları yalnızca ekranda göster, kullanıcı kaydetmeden depolamayı değiştirme.
+        (function initNewFeatures() {
+            const editor = document.getElementById('surpriseEditor');
+            if (editor) editor.value = getSurpriseMessages().join('\n');
+            const dateInput = document.getElementById('letterDate');
+            if (dateInput) dateInput.min = dateKeyLocal();
+            renderLetters();
+        })();
+    </script>
+<script>
+    // PWA: ilk online ziyaret sonrasında temel sayfa ve yerel dosyalar çevrimdışı açılabilir.
+    if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+      window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(() => {}));
+    }
+</script>
+</body>
+</html>
