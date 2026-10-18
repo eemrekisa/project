@@ -1,0 +1,13 @@
+{
+  "id": "./",
+  "name": "Emre & Dilara Anı Dünyası",
+  "short_name": "Emre & Dilara",
+  "description": "Emre ve Dilara için özel anılar dünyası",
+  "lang": "tr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#171329",
+  "theme_color": "#171329",
+  "icons": [{"src":"img/app-icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
